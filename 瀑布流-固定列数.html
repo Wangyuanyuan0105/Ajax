@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>瀑布流-固定列数</title>
+		<style>
+			body,ul,p,h3 { margin: 0;}
+			ul { padding: 0; list-style-type: none;}
+			.clearfix { *zoom: 1;}
+			.clearfix:after { content: ''; display: block; clear: both; overflow: hidden;}
+			
+			.title { width: 1200px; text-align: center; margin: 30px 0;}
+			#list { width: 1140px; margin: 10px auto 0;}
+			#list li { float: left;  border: 1px solid #ccc; padding: 10px; width: 240px;  margin-right: 20px;}
+			#list li div { width: 240px;border: 1px solid #000;  text-align: center; margin-bottom: 10px;}
+			#list li img { width: 240px;}
+			#list li p { }
+		</style>
+	</head>
+	<body>
+		<h3 class="title">瀑布流-固定列数</h3>
+		<ul id="list" class="clearfix">
+			<li>
+				<!--<div>
+					<img src="http://s2.mogucdn.com/mlcdn/c45406/170519_5i257ag5lbk3ec093f12hfha1fi90_800x1200.jpg_240x360.v1cAC.70.jpg" />
+					<p>亦美珊泳衣女分体2017裙式保守韩国小胸聚拢遮肚显瘦游泳衣</p>
+				</div>-->
+			</li>
+			<li>
+			
+			</li>
+			<li>
+			
+			</li>
+			<li>
+			
+			</li>
+		</ul>
+		<script>
+			var list = document.getElementById('list');
+			var aLi = list.getElementsByTagName('li');
+			var pageNum = 1;
+			//获取最短的li的索引
+			function getShort(){
+				var shortIndex = 0;
+				var shortHeight = aLi[0].offsetHeight;
+				for (var i = 1; i < aLi.length; i++) {
+					if( aLi[i].offsetHeight < shortHeight ){
+						shortIndex = i;
+						shortHeight = aLi[i].offsetHeight;
+					}
+				}
+				return shortIndex;
+			}
+			//获取数据
+			function ajax(fn){
+				var xhr = null;
+				try{
+					xhr = new XMLHttpRequest();
+				}catch(e){
+					xhr = new ActiveXObject('Microsoft.XMLHTTP');
+				}
+				xhr.open('GET','txt'+pageNum+'.txt',true);
+				xhr.send();
+				xhr.onreadystatechange = function(){
+					if(xhr.readyState == 4 ){
+						if(xhr.status == 200 ){
+							//alert(xhr.responseText);
+							fn && fn(xhr.responseText);
+						}
+					}
+				}
+			}
+			//循环添加数据到最短的li
+		//初始化
+		setShort();
+			function setShort(){
+				ajax(function(d){
+					//alert(666);
+					var data = JSON.parse(d);
+					if ( !data.length ) {
+						//后续没有数据了
+						return ;
+					}
+					for (var i = 0; i < data.length; i++) {
+						var oDiv = document.createElement('div');
+						
+						var oImg =document.createElement('img');
+						oImg.src = data[i].image;
+						//图片预加载，导致高度出问题
+						//得出宽度的比例
+						var scale = 225 / data[i].width;   
+						oImg.style.height = data[i].height * scale + 'px';
+						
+						var oP = document.createElement('p');
+						oP.innerHTML = data[i].title;
+						
+						oDiv.appendChild(oImg);
+						oDiv.appendChild(oP);
+						
+						aLi[getShort()].appendChild(oDiv);
+					}
+				});
+				flag = true;
+			}
+			
+			
+			//滚动到一定位置,加载下一页
+			 var flag = true;
+			window.onscroll = function(){
+				//var shortIndex = getShort();
+				if(flag){
+					var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+					var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+					if(scrollTop > scrollHeight/2){
+						pageNum++;
+						setShort();
+						flag = false;
+					}
+				}
+			}
+		</script>
+	</body>
+</html>
